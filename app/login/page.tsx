@@ -78,7 +78,8 @@ export default function LoginPage() {
           <label className="text-sm font-medium text-black">Email</label>
           <input
             type="email"
-            className="w-full border border-gray-300 rounded p-2 mt-1 text-black bg-white placeholder-gray-400"
+            className="w-full border border-gray-300 rounded p-2 mt-1 text-black bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Digite seu email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -89,7 +90,8 @@ export default function LoginPage() {
           <label className="text-sm font-medium text-black">Senha</label>
           <input
             type="password"
-            className="w-full border border-gray-300 rounded p-2 mt-1 text-black bg-white placeholder-gray-400"
+            className="w-full border border-gray-300 rounded p-2 mt-1 text-black bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Digite sua senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             required
@@ -99,7 +101,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white py-2 rounded"
+          className="w-full bg-black text-white py-2 rounded hover:opacity-90 transition disabled:opacity-50"
         >
           {loading ? "Entrando..." : "Entrar"}
         </button>

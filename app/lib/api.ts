@@ -4,18 +4,26 @@ export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
 ) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  let token: string | null = null;
+
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("token");
+  }
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+  }
 
   const res = await fetch(`${API}${endpoint}`, {
     ...options,
-    headers: {
-      ...(options.headers || {}),
-      Authorization: token ? `Bearer ${token}` : "",
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
-  // 🔥 SE DER ERRO, LÊ O JSON OU TEXTO
   if (!res.ok) {
     let message = "Erro na requisição";
 
@@ -29,7 +37,6 @@ export async function apiFetch(
     throw new Error(message);
   }
 
-  // 🔥 TRATA RESPOSTA SEM JSON (ex: 204, PDF, etc)
   const contentType = res.headers.get("content-type");
 
   if (contentType && contentType.includes("application/json")) {
