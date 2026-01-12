@@ -49,10 +49,7 @@ export default function AntesPage() {
   return (
     <div className="p-4 bg-gray-100 min-h-screen text-black">
 
-      {/* ===== TESTE VISUAL ===== */}
-      <h1 style={{ color: "red", fontSize: 28, marginBottom: 10 }}>
-        TESTE NOVO LAYOUT - SE APARECER, ESTÁ OK
-      </h1>
+    
 
       <h1 className="text-xl font-bold mb-4">Antes do Serviço</h1>
 

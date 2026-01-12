@@ -29,7 +29,7 @@ export default function DepoisPage() {
         }
       }
 
-      const res = await fetch(
+      await fetch(
         `https://gerenciador-de-os.onrender.com/projects/${id}/depois`,
         {
           method: "POST",
@@ -40,12 +40,8 @@ export default function DepoisPage() {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("Erro ao salvar DEPOIS");
-      }
-
       alert("Serviço finalizado com sucesso!");
-      router.push("/tecnico");
+      router.push(`/tecnico/${id}`);
     } catch (err) {
       alert("Erro ao finalizar serviço");
     } finally {
