@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "../../../lib/api";
+import { apiFetch } from "@/app/lib/api";
 
 export default function NovoTecnicoPage() {
   const router = useRouter();

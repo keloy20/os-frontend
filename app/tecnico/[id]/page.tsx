@@ -2,20 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiFetch } from "../../lib/api";
+import { apiFetch } from "@/app/lib/api";
 
 export default function DetalheOS() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const router = useRouter();
   const [servico, setServico] = useState<any>(null);
 
   useEffect(() => {
-    carregar();
-  }, []);
+    if (id) {
+      carregar();
+    }
+  }, [id]);
 
   async function carregar() {
-    const data = await apiFetch(`/projects/${id}`);
-    setServico(data);
+    try {
+      const data = await apiFetch(`/projects/${id}`);
+      setServico(data);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao carregar serviço");
+    }
   }
 
   if (!servico) return <p className="p-4">Carregando...</p>;
@@ -47,24 +55,23 @@ export default function DetalheOS() {
         </button>
       )}
 
-     {servico.status === "em_andamento" && (
-  <div className="flex flex-col gap-3">
-    <button
-      onClick={() => router.push(`/tecnico/${id}/antes`)}
-      className="w-full bg-blue-600 text-white py-2 rounded"
-    >
-      Preencher Antes
-    </button>
+      {servico.status === "em_andamento" && (
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => router.push(`/tecnico/${id}/antes`)}
+            className="w-full bg-blue-600 text-white py-2 rounded"
+          >
+            Preencher Antes
+          </button>
 
-    <button
-      onClick={() => router.push(`/tecnico/${id}/depois`)}
-      className="w-full bg-green-600 text-white py-2 rounded"
-    >
-      Preencher Depois
-    </button>
-  </div>
-)}
-
+          <button
+            onClick={() => router.push(`/tecnico/${id}/depois`)}
+            className="w-full bg-green-600 text-white py-2 rounded"
+          >
+            Preencher Depois
+          </button>
+        </div>
+      )}
 
       {servico.status === "concluido" && (
         <div className="bg-green-100 p-3 rounded text-green-800">

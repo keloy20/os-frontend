@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { apiFetch } from "../../../lib/api";
+import { apiFetch } from "@/app/lib/api";
 
 export default function AdminDetalheOSPage() {
   const router = useRouter();
