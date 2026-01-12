@@ -1,45 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { apiFetch } from "@/app/lib/api";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 export default function DepoisPage() {
   const { id } = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isEdit = searchParams.get("edit") === "true";
 
   const [relatorio, setRelatorio] = useState("");
   const [observacao, setObservacao] = useState("");
-  const [fotos, setFotos] = useState<File[]>([]);
+  const [fotos, setFotos] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isEdit && id) {
-      carregarDados();
-    }
-  }, [isEdit, id]);
-
-  async function carregarDados() {
-    try {
-      const data = await apiFetch(`/projects/${id}`);
-      setRelatorio(data.depois?.relatorio || "");
-      setObservacao(data.depois?.observacao || "");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function handleFotos(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return;
-    const filesArray = Array.from(e.target.files);
-    setFotos((prev) => [...prev, ...filesArray]);
-  }
-
-  function removerFoto(index: number) {
-    setFotos((prev) => prev.filter((_, i) => i !== index));
-  }
 
   async function salvarDepois(e: React.FormEvent) {
     e.preventDefault();
@@ -52,30 +23,31 @@ export default function DepoisPage() {
       formData.append("relatorio", relatorio);
       formData.append("observacao", observacao);
 
-      fotos.forEach((foto) => {
-        formData.append("fotos", foto);
-      });
+      if (fotos) {
+        for (let i = 0; i < fotos.length; i++) {
+          formData.append("fotos", fotos[i]);
+        }
+      }
 
-      const url = isEdit
-        ? `https://gerenciador-de-os.onrender.com/projects/${id}/depois/editar`
-        : `https://gerenciador-de-os.onrender.com/projects/${id}/depois`;
+      const res = await fetch(
+        `https://gerenciador-de-os.onrender.com/projects/${id}/depois`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
-      const res = await fetch(url, {
-        method: isEdit ? "PUT" : "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      if (!res.ok) {
+        throw new Error("Erro ao salvar DEPOIS");
+      }
 
-      if (!res.ok) throw new Error("Erro ao salvar");
-
-      alert(isEdit ? "Serviço atualizado!" : "Serviço finalizado!");
-      router.push(`/tecnico/${id}`);
-
+      alert("Serviço finalizado com sucesso!");
+      router.push("/tecnico");
     } catch (err) {
-      console.error(err);
-      alert("Erro ao salvar serviço");
+      alert("Erro ao finalizar serviço");
     } finally {
       setLoading(false);
     }
@@ -83,67 +55,66 @@ export default function DepoisPage() {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen text-black">
-      <h1 className="text-xl font-bold mb-4">
-        {isEdit ? "Editar Serviço (Depois)" : "Depois do Serviço"}
-      </h1>
+      <h1 className="text-xl font-bold mb-4">Depois do Serviço</h1>
 
-      <form onSubmit={salvarDepois} className="bg-white p-4 rounded shadow">
-        <textarea
-          className="w-full border p-2 mb-3"
-          placeholder="Relatório final"
-          value={relatorio}
-          onChange={(e) => setRelatorio(e.target.value)}
-          required
-        />
+      <form onSubmit={salvarDepois} className="bg-white p-4 rounded shadow space-y-4">
 
-        <textarea
-          className="w-full border p-2 mb-3"
-          placeholder="Observação"
-          value={observacao}
-          onChange={(e) => setObservacao(e.target.value)}
-        />
+        {/* RELATÓRIO */}
+        <div>
+          <label className="block text-sm font-semibold mb-1">
+            Descrição do serviço (Depois)
+          </label>
+          <textarea
+            className="w-full border p-2 rounded"
+            value={relatorio}
+            onChange={(e) => setRelatorio(e.target.value)}
+            required
+          />
+        </div>
 
-        <input
-          type="file"
-          multiple
-          onChange={handleFotos}
-          className="mb-3"
-        />
+        {/* OBSERVAÇÃO */}
+        <div>
+          <label className="block text-sm font-semibold mb-1">
+            Observação
+          </label>
+          <textarea
+            className="w-full border p-2 rounded"
+            value={observacao}
+            onChange={(e) => setObservacao(e.target.value)}
+          />
+        </div>
 
-        {/* PREVIEW */}
-        {fotos.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            {fotos.map((foto, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={URL.createObjectURL(foto)}
-                  alt="preview"
-                  className="w-full h-32 object-cover rounded border"
-                />
-                <button
-                  type="button"
-                  onClick={() => removerFoto(index)}
-                  className="absolute top-1 right-1 bg-red-600 text-white rounded-full px-2"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* FOTOS */}
+        <div>
+          <label className="block text-sm font-semibold mb-1">
+            📸 Adicionar fotos
+          </label>
+
+          <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-400 rounded p-4 cursor-pointer bg-gray-50 hover:bg-gray-100">
+            <span className="text-2xl">📷</span>
+            <span className="font-medium">Adicionar fotos</span>
+
+            <input
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => setFotos(e.target.files)}
+            />
+          </label>
+
+          {fotos && (
+            <p className="text-sm text-gray-600 mt-1">
+              {fotos.length} foto(s) selecionada(s)
+            </p>
+          )}
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded text-white ${
-            loading ? "bg-gray-400" : "bg-green-600"
-          }`}
+          className="w-full bg-green-600 text-white py-2 rounded"
         >
-          {loading
-            ? "Enviando..."
-            : isEdit
-            ? "Atualizar Serviço"
-            : "Finalizar Serviço"}
+          {loading ? "Finalizando..." : "Finalizar Serviço"}
         </button>
       </form>
     </div>
