@@ -14,7 +14,15 @@ export default function AdminDashboard() {
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
 
+  const [osHoje, setOsHoje] = useState(0);
+
   useEffect(() => {
+    const role = localStorage.getItem("role");
+    if (role !== "admin") {
+      router.push("/login");
+      return;
+    }
+
     carregarServicos();
   }, []);
 
@@ -22,11 +30,25 @@ export default function AdminDashboard() {
     try {
       const data = await apiFetch("/projects/admin/all");
       setServicos(data);
+      calcularOsHoje(data);
     } catch (err: any) {
       setErro(err.message || "Erro ao carregar serviços");
     } finally {
       setLoading(false);
     }
+  }
+
+  function calcularOsHoje(lista: any[]) {
+    const hoje = new Date();
+    const hojeStr = hoje.toISOString().split("T")[0];
+
+    const totalHoje = lista.filter((s) => {
+      if (!s.createdAt) return false;
+      const data = new Date(s.createdAt).toISOString().split("T")[0];
+      return data === hojeStr;
+    }).length;
+
+    setOsHoje(totalHoje);
   }
 
   const total = servicos.length;
@@ -67,7 +89,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+
         <div className="bg-white p-3 rounded shadow text-center">
           <p className="text-sm text-gray-600">Total</p>
           <p className="text-2xl font-bold">{total}</p>
@@ -87,6 +110,12 @@ export default function AdminDashboard() {
           <p className="text-sm text-orange-800">Aguardando</p>
           <p className="text-2xl font-bold text-orange-900">{aguardando}</p>
         </div>
+
+        <div className="bg-blue-100 p-3 rounded shadow text-center">
+          <p className="text-sm text-blue-800">OS Hoje</p>
+          <p className="text-2xl font-bold text-blue-900">{osHoje}</p>
+        </div>
+
       </div>
 
       {/* FILTROS + AÇÕES */}
@@ -161,13 +190,12 @@ export default function AdminDashboard() {
               </span>
             </div>
 
-            <span className="text-gray-800">{s.cliente}</span>
+            <span className="text-gray-800">Cliente: {s.cliente}</span>
             <span className="text-sm text-gray-600">{s.endereco}</span>
             <span className="text-sm text-gray-600">
               Técnico: {s.tecnico?.nome || "-"}
             </span>
 
-            {/* AÇÕES */}
             <div className="flex gap-2 mt-2">
               <button
                 onClick={() => router.push(`/admin/servicos/${s._id}`)}

@@ -21,9 +21,9 @@ export default function TecnicoDashboard() {
   async function carregarServicos() {
     try {
       const data = await apiFetch("/projects/me");
-      setServicos(data);
+      setServicos(data || []);
     } catch (err: any) {
-      setErro(err.message);
+      setErro(err.message || "Erro ao carregar serviços");
     } finally {
       setLoading(false);
     }
@@ -39,9 +39,12 @@ export default function TecnicoDashboard() {
   }
 
   const servicosFiltrados = servicos.filter((s) => {
+    const cliente = s.cliente || "";
+    const osNumero = s.osNumero || "";
+
     const matchBusca =
-      s.cliente.toLowerCase().includes(busca.toLowerCase()) ||
-      s.osNumero.toLowerCase().includes(busca.toLowerCase());
+      cliente.toLowerCase().includes(busca.toLowerCase()) ||
+      osNumero.toLowerCase().includes(busca.toLowerCase());
 
     const matchStatus = filtroStatus ? s.status === filtroStatus : true;
 
@@ -53,6 +56,7 @@ export default function TecnicoDashboard() {
       {/* TOPO */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Meus Serviços</h1>
+
         <button
           onClick={() => {
             localStorage.clear();
@@ -97,12 +101,28 @@ export default function TecnicoDashboard() {
             className="bg-white p-4 rounded shadow flex flex-col gap-2"
           >
             <div className="flex justify-between items-center">
-              <strong className="text-black">{s.osNumero}</strong>
-              <span className="text-sm text-gray-600">{s.status}</span>
+              <strong className="text-black">
+                OS {s.osNumero || "-"}
+              </strong>
+
+              <span
+                className={`text-sm font-semibold px-2 py-1 rounded
+                  ${
+                    s.status === "concluido"
+                      ? "bg-green-100 text-green-700"
+                      : s.status === "em_andamento"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-orange-100 text-orange-700"
+                  }`}
+              >
+                {s.status === "concluido" && "Concluído"}
+                {s.status === "em_andamento" && "Em andamento"}
+                {s.status === "aguardando_tecnico" && "Aguardando"}
+              </span>
             </div>
 
-            <span className="text-gray-800">{s.cliente}</span>
-            <span className="text-sm text-gray-600">{s.endereco}</span>
+            <span className="text-gray-800">{s.cliente || "-"}</span>
+            <span className="text-sm text-gray-600">{s.endereco || "-"}</span>
 
             {/* AÇÕES */}
             <div className="flex gap-2 mt-2">
