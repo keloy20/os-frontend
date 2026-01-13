@@ -71,25 +71,34 @@ export default function AdminDetalheOS() {
   if (!os) return <p className="p-6">OS não encontrada</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-start py-10">
-      <div className="bg-white w-full max-w-3xl rounded-xl shadow-lg p-6">
+    <div className="min-h-screen bg-gray-100 flex justify-center py-8">
+      <div className="bg-white w-full max-w-4xl rounded-xl shadow-md p-6">
 
-        {/* Título */}
-        <div className="mb-6 border-b pb-4">
-          <h1 className="text-2xl font-bold text-gray-800">OS {os.osNumero}</h1>
-          <p className="text-sm text-gray-500">Detalhes do serviço</p>
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">OS {os.osNumero}</h1>
+            <p className="text-sm text-gray-500">Detalhes do serviço</p>
+          </div>
+
+          <button
+            onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL}/projects/${id}/pdf`, "_blank")}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+          >
+            📄 Baixar PDF
+          </button>
         </div>
 
-        {/* Informações */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* INFO */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-800">
           <div>
             <p className="text-sm text-gray-500">Cliente</p>
-            <p className="font-semibold text-gray-800">{os.cliente}</p>
+            <p className="font-semibold">{os.cliente}</p>
           </div>
 
           <div>
             <p className="text-sm text-gray-500">Endereço</p>
-            <p className="font-semibold text-gray-800">{os.endereco}</p>
+            <p className="font-semibold">{os.endereco}</p>
           </div>
 
           <div>
@@ -101,27 +110,27 @@ export default function AdminDetalheOS() {
 
           <div>
             <p className="text-sm text-gray-500">Técnico Atual</p>
-            <p className="font-semibold text-gray-800">{os.tecnico?.nome}</p>
+            <p className="font-semibold">{os.tecnico?.nome}</p>
           </div>
         </div>
 
-        {/* Ações */}
+        {/* AÇÕES */}
         <div className="border-t pt-6 space-y-4">
 
-          {/* Cancelar */}
+          {/* CANCELAR */}
           <button
             onClick={cancelarServico}
-            className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold transition"
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold transition"
           >
             ❌ Cancelar Serviço
           </button>
 
-          {/* Trocar técnico */}
-          <div className="flex flex-col md:flex-row md:items-center gap-3">
+          {/* TROCAR TÉCNICO */}
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
             <select
               value={novoTecnico}
               onChange={(e) => setNovoTecnico(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-gray-800 bg-white w-full md:w-64"
             >
               <option value="">Selecione um técnico</option>
               {tecnicos.map((t) => (
@@ -139,10 +148,10 @@ export default function AdminDetalheOS() {
             </button>
           </div>
 
-          {/* Voltar */}
+          {/* VOLTAR */}
           <button
             onClick={() => router.back()}
-            className="mt-4 text-gray-600 hover:text-gray-800 underline"
+            className="text-gray-600 hover:text-gray-900 font-medium underline"
           >
             ← Voltar
           </button>
