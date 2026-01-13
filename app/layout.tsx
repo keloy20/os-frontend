@@ -24,9 +24,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+
+        {/* TESTE GLOBAL */}
+        <div
+          style={{
+            background: "red",
+            color: "white",
+            padding: "15px",
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: "18px"
+          }}
+        >
+          🚨 TESTE GLOBAL – SE VOCÊ VÊ ISSO, ESTE PROJETO ESTÁ SENDO USADO
+        </div>
+
         {children}
       </body>
     </html>
