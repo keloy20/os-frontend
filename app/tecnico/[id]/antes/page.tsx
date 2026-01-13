@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { apiFetch } from "@/app/lib/api";
 
 export default function AntesPage() {
   const { id } = useParams();
@@ -11,6 +12,18 @@ export default function AntesPage() {
   const [observacao, setObservacao] = useState("");
   const [fotos, setFotos] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    carregar();
+  }, []);
+
+  async function carregar() {
+    try {
+      const data = await apiFetch(`/projects/${id}`);
+      setRelatorio(data.antes?.relatorio || "");
+      setObservacao(data.antes?.observacao || "");
+    } catch {}
+  }
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
@@ -32,15 +45,16 @@ export default function AntesPage() {
       await fetch(`https://gerenciador-de-os.onrender.com/projects/${id}/antes`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: formData,
+        body: formData
       });
 
-      alert("Antes salvo com sucesso!");
+      alert("ANTES atualizado com sucesso!");
       router.push(`/tecnico/${id}`);
-    } catch (err) {
-      alert("Erro ao salvar");
+
+    } catch {
+      alert("Erro ao salvar ANTES");
     } finally {
       setLoading(false);
     }
@@ -48,18 +62,12 @@ export default function AntesPage() {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen text-black">
-
-    
-
-      <h1 className="text-xl font-bold mb-4">Antes do Serviço</h1>
+      <h1 className="text-xl font-bold mb-4">📝 ANTES do Serviço</h1>
 
       <form onSubmit={salvar} className="bg-white p-4 rounded shadow space-y-4">
 
-        {/* RELATÓRIO */}
         <div>
-          <label className="block text-sm font-semibold mb-1">
-            Descrição do serviço (Antes)
-          </label>
+          <label className="block font-semibold mb-1">Descrição do serviço (Antes)</label>
           <textarea
             className="w-full border p-2 rounded"
             value={relatorio}
@@ -68,11 +76,8 @@ export default function AntesPage() {
           />
         </div>
 
-        {/* OBSERVAÇÃO */}
         <div>
-          <label className="block text-sm font-semibold mb-1">
-            Observação
-          </label>
+          <label className="block font-semibold mb-1">Observação</label>
           <textarea
             className="w-full border p-2 rounded"
             value={observacao}
@@ -80,16 +85,12 @@ export default function AntesPage() {
           />
         </div>
 
-        {/* FOTOS */}
         <div>
-          <label className="block text-sm font-semibold mb-1">
-            📸 Adicionar fotos
-          </label>
+          <label className="block font-semibold mb-1">📸 Adicionar fotos</label>
 
-          <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-400 rounded p-4 cursor-pointer bg-gray-50 hover:bg-gray-100">
+          <label className="flex items-center justify-center gap-2 border-2 border-dashed rounded p-4 cursor-pointer bg-gray-50 hover:bg-gray-100">
             <span className="text-2xl">📷</span>
-            <span className="font-medium">Adicionar fotos</span>
-
+            <span>Adicionar fotos</span>
             <input
               type="file"
               multiple
@@ -99,7 +100,7 @@ export default function AntesPage() {
           </label>
 
           {fotos && (
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm mt-1 text-gray-600">
               {fotos.length} foto(s) selecionada(s)
             </p>
           )}
@@ -110,9 +111,10 @@ export default function AntesPage() {
           disabled={loading}
           className="w-full bg-blue-600 text-white py-2 rounded"
         >
-          {loading ? "Salvando..." : "Salvar Antes"}
+          {loading ? "Salvando..." : "Salvar ANTES"}
         </button>
       </form>
     </div>
   );
 }
+
