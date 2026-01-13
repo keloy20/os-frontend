@@ -13,7 +13,6 @@ export default function AdminDashboard() {
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
-
   const [osHoje, setOsHoje] = useState(0);
 
   useEffect(() => {
@@ -39,13 +38,12 @@ export default function AdminDashboard() {
   }
 
   function calcularOsHoje(lista: any[]) {
-    const hoje = new Date();
-    const hojeStr = hoje.toISOString().split("T")[0];
+    const hoje = new Date().toISOString().split("T")[0];
 
     const totalHoje = lista.filter((s) => {
       if (!s.createdAt) return false;
       const data = new Date(s.createdAt).toISOString().split("T")[0];
-      return data === hojeStr;
+      return data === hoje;
     }).length;
 
     setOsHoje(totalHoje);
@@ -73,7 +71,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 text-black">
-      {/* TOPO */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Painel Admin</h1>
 
@@ -88,9 +85,7 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-
         <div className="bg-white p-3 rounded shadow text-center">
           <p className="text-sm text-gray-600">Total</p>
           <p className="text-2xl font-bold">{total}</p>
@@ -115,10 +110,8 @@ export default function AdminDashboard() {
           <p className="text-sm text-blue-800">OS Hoje</p>
           <p className="text-2xl font-bold text-blue-900">{osHoje}</p>
         </div>
-
       </div>
 
-      {/* FILTROS + AÇÕES */}
       <div className="bg-white p-3 rounded shadow mb-4 flex flex-col md:flex-row gap-2">
         <input
           type="text"
@@ -145,26 +138,11 @@ export default function AdminDashboard() {
         >
           + Nova OS
         </button>
-
-        <button
-          onClick={() => router.push("/admin/tecnicos")}
-          className="bg-gray-700 text-white px-4 py-2 rounded"
-        >
-          Técnicos
-        </button>
-
-        <button
-          onClick={() => router.push("/admin/calendario")}
-          className="bg-purple-600 text-white px-4 py-2 rounded"
-        >
-          📅 Calendário
-        </button>
       </div>
 
       {loading && <p>Carregando serviços...</p>}
       {erro && <p className="text-red-600">{erro}</p>}
 
-      {/* LISTA */}
       <div className="grid gap-3">
         {servicosFiltrados.map((s) => (
           <div
@@ -174,19 +152,8 @@ export default function AdminDashboard() {
             <div className="flex justify-between items-center">
               <strong>{s.osNumero}</strong>
 
-              <span
-                className={`text-sm font-semibold px-2 py-1 rounded
-                  ${
-                    s.status === "concluido"
-                      ? "bg-green-100 text-green-700"
-                      : s.status === "em_andamento"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-orange-100 text-orange-700"
-                  }`}
-              >
-                {s.status === "concluido" && "Concluído"}
-                {s.status === "em_andamento" && "Em andamento"}
-                {s.status === "aguardando_tecnico" && "Aguardando"}
+              <span className="text-sm font-semibold px-2 py-1 rounded bg-orange-100 text-orange-700">
+                {s.status}
               </span>
             </div>
 
@@ -206,12 +173,6 @@ export default function AdminDashboard() {
             </div>
           </div>
         ))}
-
-        {servicosFiltrados.length === 0 && !loading && (
-          <p className="text-gray-600 text-center">
-            Nenhum serviço encontrado
-          </p>
-        )}
       </div>
     </div>
   );
