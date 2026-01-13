@@ -34,19 +34,26 @@ export default function AdminDetalheOS() {
     carregar();
   }, [id]);
 
-  async function cancelarServico() {
-    if (!confirm("Tem certeza que deseja cancelar este serviço?")) return;
+ async function cancelarServico() {
+  console.log("CLIQUEI EM CANCELAR", id);
+  alert("Clique detectado! ID: " + id);
 
-    try {
-      await apiFetch(`/projects/admin/cancelar/${id}`, {
-        method: "PUT"
-      });
-      alert("Serviço cancelado com sucesso!");
-      router.refresh();
-    } catch (err: any) {
-      alert("Erro ao cancelar: " + err.message);
-    }
+  if (!confirm("Tem certeza que deseja cancelar este serviço?")) return;
+
+  try {
+    const res = await apiFetch(`/projects/admin/cancelar/${id}`, {
+      method: "PUT"
+    });
+
+    console.log("RESPOSTA CANCELAR:", res);
+    alert("Serviço cancelado com sucesso!");
+    router.refresh();
+  } catch (err: any) {
+    console.error("ERRO CANCELAR:", err);
+    alert("Erro ao cancelar: " + err.message);
   }
+}
+
 
   async function trocarTecnico() {
     if (!novoTecnico) {
