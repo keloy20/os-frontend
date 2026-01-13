@@ -1,32 +1,21 @@
 "use client";
 
-export default function TesteCliqueForcado() {
+import { useEffect } from "react";
+
+export default function TesteJS() {
+  useEffect(() => {
+    alert("JS HIDRATOU – useEffect rodou");
+    console.log("JS HIDRATOU");
+  }, []);
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.2)",
-        zIndex: 99998,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center"
-      }}
-    >
+    <div style={{ padding: 50 }}>
+      <h1>TESTE DE HIDRATAÇÃO</h1>
       <button
-        onClick={() => alert("CLIQUE FUNCIONOU AGORA")}
-        style={{
-          background: "green",
-          color: "white",
-          padding: "25px 40px",
-          fontSize: "22px",
-          borderRadius: "12px",
-          cursor: "pointer",
-          zIndex: 99999,
-          position: "relative"
-        }}
+        onClick={() => alert("CLIQUE FUNCIONOU")}
+        style={{ padding: 20, background: "green", color: "white" }}
       >
-        BOTÃO FORÇADO – TESTE DE CLIQUE
+        TESTAR CLIQUE
       </button>
     </div>
   );
