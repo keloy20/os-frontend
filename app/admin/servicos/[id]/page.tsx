@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/app/lib/api";
 
 export default function AdminDetalheOSPage() {
@@ -12,41 +12,6 @@ export default function AdminDetalheOSPage() {
   const [servico, setServico] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
-
-  async function baixarPDF(id: string) {
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(
-      `https://gerenciador-de-os.onrender.com/projects/${id}/pdf`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error("Erro ao gerar PDF");
-    }
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `OS-${id}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    window.URL.revokeObjectURL(url);
-
-  } catch (err: any) {
-    alert(err.message || "Erro ao baixar PDF");
-  }
-}
-
 
   useEffect(() => {
     carregarServico();
@@ -60,6 +25,38 @@ export default function AdminDetalheOSPage() {
       setErro(err.message || "Erro ao carregar serviço");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function cancelarServico() {
+    if (!confirm("Tem certeza que deseja CANCELAR este serviço?")) return;
+
+    try {
+      await apiFetch(`/projects/admin/cancelar/${id}`, {
+        method: "PUT"
+      });
+
+      alert("Serviço cancelado com sucesso!");
+      router.push("/admin");
+    } catch (err: any) {
+      alert(err.message || "Erro ao cancelar serviço");
+    }
+  }
+
+  async function trocarTecnico() {
+    const novoTecnicoId = prompt("Cole aqui o ID do novo técnico:");
+    if (!novoTecnicoId) return;
+
+    try {
+      await apiFetch(`/projects/admin/change-tecnico/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ tecnicoId: novoTecnicoId })
+      });
+
+      alert("Técnico trocado com sucesso!");
+      router.push("/admin");
+    } catch (err: any) {
+      alert(err.message || "Erro ao trocar técnico");
     }
   }
 
@@ -90,7 +87,7 @@ export default function AdminDetalheOSPage() {
         <p><strong>Endereço:</strong> {servico.endereco}</p>
         <p><strong>Tipo de Serviço:</strong> {servico.tipoServico}</p>
 
-        {/* STATUS COLORIDO */}
+        {/* STATUS */}
         <div className="mt-2">
           <span className="font-bold">Status: </span>
           <span
@@ -100,12 +97,15 @@ export default function AdminDetalheOSPage() {
                   ? "bg-green-100 text-green-700"
                   : servico.status === "em_andamento"
                   ? "bg-yellow-100 text-yellow-700"
+                  : servico.status === "cancelado"
+                  ? "bg-red-100 text-red-700"
                   : "bg-orange-100 text-orange-700"
               }`}
           >
             {servico.status === "concluido" && "Concluído"}
             {servico.status === "em_andamento" && "Em andamento"}
             {servico.status === "aguardando_tecnico" && "Aguardando técnico"}
+            {servico.status === "cancelado" && "Cancelado"}
           </span>
         </div>
 
@@ -150,22 +150,23 @@ export default function AdminDetalheOSPage() {
         </div>
       </div>
 
-      {/* BOTÕES */}
-      <div className="flex gap-3">
-        <button
-          onClick={() => baixarPDF(servico._id)}
+      {/* BOTÕES ADMIN */}
+      <div className="flex flex-col gap-3 mt-4">
 
-          className="flex-1 bg-blue-600 text-white py-2 rounded"
+        <button
+          onClick={cancelarServico}
+          className="w-full bg-red-600 text-white py-2 rounded"
         >
-          Baixar PDF
+          ❌ Cancelar Serviço
         </button>
 
         <button
-          onClick={() => router.back()}
-          className="flex-1 bg-gray-600 text-white py-2 rounded"
+          onClick={trocarTecnico}
+          className="w-full bg-blue-600 text-white py-2 rounded"
         >
-          Voltar
+          🔁 Trocar Técnico
         </button>
+
       </div>
     </div>
   );
