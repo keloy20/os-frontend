@@ -4,116 +4,138 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/app/lib/api";
 
-export default function DepoisPage() {
+export default function AdminServicoDetalhe() {
   const { id } = useParams();
   const router = useRouter();
 
-  const [relatorio, setRelatorio] = useState("");
-  const [observacao, setObservacao] = useState("");
-  const [fotos, setFotos] = useState<FileList | null>(null);
+  const [servico, setServico] = useState<any>(null);
+  const [tecnicos, setTecnicos] = useState<any[]>([]);
+  const [novoTecnico, setNovoTecnico] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    carregar();
+    carregarServico();
+    carregarTecnicos();
   }, []);
 
-  async function carregar() {
+  async function carregarServico() {
     try {
       const data = await apiFetch(`/projects/${id}`);
-      setRelatorio(data.depois?.relatorio || "");
-      setObservacao(data.depois?.observacao || "");
-    } catch {}
+      setServico(data);
+    } catch (err) {
+      alert("Erro ao carregar serviço");
+    }
   }
 
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  async function carregarTecnicos() {
+    try {
+      const data = await apiFetch("/auth/tecnicos");
+      setTecnicos(data);
+    } catch (err) {
+      console.log("Erro ao buscar técnicos");
+    }
+  }
+
+  async function cancelarServico() {
+    if (!confirm("Tem certeza que deseja CANCELAR este serviço?")) return;
 
     try {
-      const token = localStorage.getItem("token");
-
-      const formData = new FormData();
-      formData.append("relatorio", relatorio);
-      formData.append("observacao", observacao);
-
-      if (fotos) {
-        for (let i = 0; i < fotos.length; i++) {
-          formData.append("fotos", fotos[i]);
-        }
-      }
-
-      await fetch(`https://gerenciador-de-os.onrender.com/projects/${id}/depois`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
+      setLoading(true);
+      await apiFetch(`/projects/admin/cancelar/${id}`, {
+        method: "PUT"
       });
 
-      alert("DEPOIS atualizado com sucesso!");
-      router.push(`/tecnico/${id}`);
-
-    } catch {
-      alert("Erro ao salvar DEPOIS");
+      alert("Serviço cancelado com sucesso");
+      router.push("/admin");
+    } catch (err: any) {
+      alert(err.message || "Erro ao cancelar");
     } finally {
       setLoading(false);
     }
   }
 
+  async function trocarTecnico() {
+    if (!novoTecnico) {
+      alert("Selecione um técnico");
+      return;
+    }
+
+    if (!confirm("Tem certeza que deseja trocar o técnico deste serviço?")) return;
+
+    try {
+      setLoading(true);
+      await apiFetch(`/projects/admin/change-tecnico/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ tecnicoId: novoTecnico })
+      });
+
+      alert("Técnico alterado com sucesso");
+      carregarServico();
+      setNovoTecnico("");
+    } catch (err: any) {
+      alert(err.message || "Erro ao trocar técnico");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!servico) return <p className="p-4">Carregando...</p>;
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen text-black">
-      <h1 className="text-xl font-bold mb-4">🛠️ DEPOIS do Serviço</h1>
+      <button
+        onClick={() => router.back()}
+        className="mb-3 bg-gray-600 text-white px-3 py-1 rounded"
+      >
+        Voltar
+      </button>
 
-      <form onSubmit={salvar} className="bg-white p-4 rounded shadow space-y-4">
+      <div className="bg-white p-4 rounded shadow mb-4 space-y-2">
+        <p><strong>OS:</strong> {servico.osNumero}</p>
+        <p><strong>Cliente:</strong> {servico.cliente}</p>
+        <p><strong>Endereço:</strong> {servico.endereco}</p>
+        <p><strong>Status:</strong> {servico.status}</p>
+        <p><strong>Técnico atual:</strong> {servico.tecnico?.nome || "-"}</p>
+      </div>
 
-        <div>
-          <label className="block font-semibold mb-1">Descrição do serviço (Depois)</label>
-          <textarea
-            className="w-full border p-2 rounded"
-            value={relatorio}
-            onChange={(e) => setRelatorio(e.target.value)}
-            required
-          />
-        </div>
+      {/* ===== TROCAR TÉCNICO ===== */}
+      <div className="bg-white p-4 rounded shadow mb-4 space-y-2">
+        <h2 className="font-bold text-lg">Trocar Técnico</h2>
 
-        <div>
-          <label className="block font-semibold mb-1">Observação</label>
-          <textarea
-            className="w-full border p-2 rounded"
-            value={observacao}
-            onChange={(e) => setObservacao(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-1">📸 Adicionar fotos</label>
-
-          <label className="flex items-center justify-center gap-2 border-2 border-dashed rounded p-4 cursor-pointer bg-gray-50 hover:bg-gray-100">
-            <span className="text-2xl">📷</span>
-            <span>Adicionar fotos</span>
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => setFotos(e.target.files)}
-            />
-          </label>
-
-          {fotos && (
-            <p className="text-sm mt-1 text-gray-600">
-              {fotos.length} foto(s) selecionada(s)
-            </p>
-          )}
-        </div>
+        <select
+          value={novoTecnico}
+          onChange={(e) => setNovoTecnico(e.target.value)}
+          className="w-full border p-2 rounded"
+        >
+          <option value="">Selecione um técnico</option>
+          {tecnicos.map((t) => (
+            <option key={t._id} value={t._id}>
+              {t.nome}
+            </option>
+          ))}
+        </select>
 
         <button
-          type="submit"
+          onClick={trocarTecnico}
           disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded"
+          className="w-full bg-blue-600 text-white py-2 rounded"
         >
-          {loading ? "Salvando..." : "Salvar DEPOIS"}
+          🔄 Trocar Técnico
         </button>
-      </form>
+      </div>
+
+      {/* ===== CANCELAR ===== */}
+      <div className="bg-white p-4 rounded shadow">
+        <h2 className="font-bold text-lg text-red-600">Zona de Perigo</h2>
+
+        <button
+          onClick={cancelarServico}
+          disabled={loading}
+          className="w-full bg-red-600 text-white py-2 rounded mt-2"
+        >
+          ❌ Cancelar Serviço
+        </button>
+      </div>
     </div>
   );
 }
