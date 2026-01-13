@@ -57,9 +57,6 @@ export default function AdminDetalheOS() {
     try {
       await apiFetch(`/projects/admin/change-tecnico/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({ tecnicoId: novoTecnico })
       });
 
@@ -70,75 +67,87 @@ export default function AdminDetalheOS() {
     }
   }
 
-  if (loading) return <p className="p-4">Carregando...</p>;
-  if (!os) return <p className="p-4">OS não encontrada</p>;
+  if (loading) return <p className="p-6">Carregando...</p>;
+  if (!os) return <p className="p-6">OS não encontrada</p>;
 
   return (
-    <div className="p-4 text-black">
-      <h1 className="text-xl font-bold mb-4">OS {os.osNumero}</h1>
+    <div className="min-h-screen bg-gray-100 flex justify-center items-start py-10">
+      <div className="bg-white w-full max-w-3xl rounded-xl shadow-lg p-6">
 
-      <div className="mb-4">
-        <p><b>Cliente:</b> {os.cliente}</p>
-        <p><b>Endereço:</b> {os.endereco}</p>
-        <p><b>Status:</b> {os.status}</p>
-        <p><b>Técnico atual:</b> {os.tecnico?.nome}</p>
+        {/* Título */}
+        <div className="mb-6 border-b pb-4">
+          <h1 className="text-2xl font-bold text-gray-800">OS {os.osNumero}</h1>
+          <p className="text-sm text-gray-500">Detalhes do serviço</p>
+        </div>
+
+        {/* Informações */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <p className="text-sm text-gray-500">Cliente</p>
+            <p className="font-semibold text-gray-800">{os.cliente}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Endereço</p>
+            <p className="font-semibold text-gray-800">{os.endereco}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Status</p>
+            <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+              {os.status}
+            </span>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Técnico Atual</p>
+            <p className="font-semibold text-gray-800">{os.tecnico?.nome}</p>
+          </div>
+        </div>
+
+        {/* Ações */}
+        <div className="border-t pt-6 space-y-4">
+
+          {/* Cancelar */}
+          <button
+            onClick={cancelarServico}
+            className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold transition"
+          >
+            ❌ Cancelar Serviço
+          </button>
+
+          {/* Trocar técnico */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3">
+            <select
+              value={novoTecnico}
+              onChange={(e) => setNovoTecnico(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64"
+            >
+              <option value="">Selecione um técnico</option>
+              {tecnicos.map((t) => (
+                <option key={t._id} value={t._id}>
+                  {t.nome}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={trocarTecnico}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold transition"
+            >
+              🔁 Trocar Técnico
+            </button>
+          </div>
+
+          {/* Voltar */}
+          <button
+            onClick={() => router.back()}
+            className="mt-4 text-gray-600 hover:text-gray-800 underline"
+          >
+            ← Voltar
+          </button>
+        </div>
       </div>
-
-      <div className="mb-6">
-        <button
-          onClick={cancelarServico}
-          style={{
-            background: "#dc2626",
-            color: "white",
-            padding: "10px 16px",
-            borderRadius: 6,
-            marginRight: 10
-          }}
-        >
-          ❌ Cancelar Serviço
-        </button>
-      </div>
-
-      <div className="mb-6">
-        <label className="block mb-2 font-semibold">Trocar técnico:</label>
-        <select
-          value={novoTecnico}
-          onChange={(e) => setNovoTecnico(e.target.value)}
-          className="border p-2 rounded w-64"
-        >
-          <option value="">Selecione um técnico</option>
-          {tecnicos.map((t) => (
-            <option key={t._id} value={t._id}>
-              {t.nome}
-            </option>
-          ))}
-        </select>
-
-        <button
-          onClick={trocarTecnico}
-          style={{
-            background: "#2563eb",
-            color: "white",
-            padding: "10px 16px",
-            borderRadius: 6,
-            marginLeft: 10
-          }}
-        >
-          🔁 Trocar Técnico
-        </button>
-      </div>
-
-      <button
-        onClick={() => router.back()}
-        style={{
-          background: "#6b7280",
-          color: "white",
-          padding: "10px 16px",
-          borderRadius: 6
-        }}
-      >
-        Voltar
-      </button>
     </div>
   );
 }
