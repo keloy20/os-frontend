@@ -19,7 +19,7 @@ export default function AdminDetalheOSPage() {
 
   async function carregarServico() {
     try {
-      const data = await apiFetch(`/projects/admin/view/${id}`);
+      const data = await apiFetch(`/admin/view/${id}`);
       setServico(data);
     } catch (err: any) {
       setErro(err.message || "Erro ao carregar serviço");
@@ -32,7 +32,7 @@ export default function AdminDetalheOSPage() {
     if (!confirm("Tem certeza que deseja CANCELAR este serviço?")) return;
 
     try {
-      await apiFetch(`/projects/admin/cancelar/${id}`, {
+      await apiFetch(`/admin/cancelar/${id}`, {
         method: "PUT"
       });
 
@@ -48,7 +48,7 @@ export default function AdminDetalheOSPage() {
     if (!novoTecnicoId) return;
 
     try {
-      await apiFetch(`/projects/admin/change-tecnico/${id}`, {
+      await apiFetch(`/admin/change-tecnico/${id}`, {
         method: "PUT",
         body: JSON.stringify({ tecnicoId: novoTecnicoId })
       });
